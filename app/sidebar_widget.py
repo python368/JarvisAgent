@@ -16,3 +16,4 @@ class SidebarWidget(QWidget):
         layout.addWidget(QPushButton("历史记录"))
         
         layout.addStretch()  # 占位
+        self.setObjectName("sidebar")  # 让 QSS 能识别

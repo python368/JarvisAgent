@@ -35,3 +35,4 @@ class ChatWidget(QWidget):
             self.chat_display.append(f"你: {msg}")
             self.input_field.clear()
             self.chat_display.append("AI: 开发中... (下一步接入 agent)")
+            
