@@ -10,12 +10,12 @@ def main():
     app.setStyleSheet("""
         QMainWindow {
             background: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
+            border-radius: 15px;
         }
 
         QWidget#central {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
+            border-radius: 15px;
         }
 
         QWidget#sidebar {

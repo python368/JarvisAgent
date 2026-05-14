@@ -16,12 +16,11 @@ class MainWindow(QMainWindow):
         # ========== 毛玻璃 + 圆角 + 阴影 ==========
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
-
         # 添加阴影效果
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(30)
-        shadow.setColor(QColor(0, 0, 0, 180))
-        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(0, 0, 0, 200))
+        shadow.setOffset(0, 6)
         self.setGraphicsEffect(shadow)
 
         self.init_ui()
