@@ -1,10 +1,12 @@
 # app/main_window.py
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPalette, QColor, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QPalette, QColor
+from PyQt6.QtWidgets import QGraphicsDropShadowEffect
 from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout
 
 from app.chat_widget import ChatWidget
 from app.sidebar_widget import SidebarWidget
+from app.settings_window import SettingsWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -32,6 +34,8 @@ class MainWindow(QMainWindow):
 
         # 左侧栏
         self.sidebar = SidebarWidget()
+        # Open settings dialog when settings button is clicked
+        self.sidebar.btn_settings.clicked.connect(self.open_settings)
         self.sidebar.setObjectName("sidebar")
 
         # 主聊天区
@@ -42,3 +46,8 @@ class MainWindow(QMainWindow):
 
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+
+    def open_settings(self):
+        """Open the SettingsWindow dialog."""
+        settings = SettingsWindow(self)
+        settings.exec()

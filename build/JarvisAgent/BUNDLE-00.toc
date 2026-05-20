@@ -1,0 +1,3 @@
+([('JarvisAgent',
+   '/Users/kangning/Desktop/JarvisAgent/dist/JarvisAgent',
+   'EXECUTABLE')],)

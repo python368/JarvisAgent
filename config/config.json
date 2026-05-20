@@ -1,0 +1,6 @@
+{
+    "api_key": "",
+    "model_provider": "OpenAI",
+    "model_name": "手动输入模型名称",
+    "ollama_url": "http://localhost:11434"
+}

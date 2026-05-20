@@ -8,18 +8,23 @@ def main():
 
     # ========== 深色主题 + 液体玻璃效果（直接写在 main.py 中） ==========
     app.setStyleSheet("""
+        /* Global font */
+        * {
+            font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+        }
+
         QMainWindow {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(20, 20, 30, 0.6);
             border-radius: 15px;
         }
 
         QWidget#central {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(30, 30, 40, 0.5);
             border-radius: 15px;
         }
 
         QWidget#sidebar {
-            background: rgba(30, 30, 38, 0.6);
+            background: rgba(35, 35, 45, 0.6);
             border-right: 1px solid rgba(255,255,255,0.08);
             border-top-left-radius: 12px;
             border-bottom-left-radius: 12px;
@@ -27,7 +32,7 @@ def main():
 
         QPushButton {
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #2a2e3d, stop:1 #1c1f2a);
+                stop:0 #3b4252, stop:1 #2e3440);
             color: #e0e0ff;
             border: none;
             border-radius: 8px;
@@ -36,10 +41,10 @@ def main():
         }
         QPushButton:hover {
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #3b3f52, stop:1 #2a2e3d);
+                stop:0 #434c5e, stop:1 #3b4252);
         }
 
-        QLineEdit {
+        QLineEdit, QComboBox {
             background: rgba(40, 44, 55, 0.6);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px;
@@ -47,9 +52,12 @@ def main():
             color: #e0e0ff;
             font-size: 14px;
         }
-        QLineEdit:focus {
+        QLineEdit:focus, QComboBox:focus {
             border: 1px solid #5a9cff;
             background: rgba(45, 50, 62, 0.7);
+        }
+        QComboBox::drop-down {
+            border: none;
         }
 
         QTextEdit {
