@@ -2,5 +2,33 @@
     "api_key": "",
     "model_provider": "OpenAI",
     "model_name": "手动输入模型名称",
-    "ollama_url": "http://localhost:11434"
+    "ollama_url": "http://localhost:11434",
+    "app_name": "JarvisAgent",
+    "version": "1.0.0",
+    "description": "A local autonomous agent workspace.",
+    "author": "AI Assistant",
+    "license": "MIT",
+    "main": "main.py",
+    "platforms": {
+        "macOS": {
+            "bundle_identifier": "com.example.JarvisAgent",
+            "icon_file": "icon.icns",
+            "plist": {
+                "CFBundleName": "JarvisAgent",
+                "CFBundleDisplayName": "JarvisAgent",
+                "CFBundleVersion": "1.0.0",
+                "CFBundleShortVersionString": "1.0.0",
+                "NSHighResolutionCapable": "True",
+                "CFBundlePackageType": "APPL",
+                "CFBundleSignature": "????",
+                "NSHumanReadableCopyright": "Copyright © 2023 AI Assistant."
+            }
+        }
+    },
+    "dependencies": {
+        "PyQt6": "*",
+        "requests": "*",
+        "openai": "*",
+        "ollama": "*"
+    }
 }
