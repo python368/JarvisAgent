@@ -29,6 +29,7 @@
         "PyQt6": "*",
         "requests": "*",
         "openai": "*",
-        "ollama": "*"
+        "ollama": "*",
+        "google-generativeai": "*"
     }
 }

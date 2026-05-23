@@ -1,0 +1,55 @@
+/* app/styles.qss */
+QWidget {
+    font-family: -apple-system, "Helvetica Neue", "Lucida Grande", sans-serif;
+    font-size: 14px;
+    background-color: #f6f6f6; /* 浅灰色背景 */
+    color: #333333; /* 深灰色文本 */
+}
+
+QMainWindow {
+    background-color: transparent; /* 主窗口背景透明，用于圆角和阴影 */
+}
+
+/* 主容器 */
+#central {
+    background-color: #ffffff; /* 白色内容区域 */
+    border-radius: 12px; /* 圆角 */
+    border: 1px solid #e0e0e0; /* 细边框 */
+}
+
+/* 侧边栏 */
+#sidebar {
+    background-color: #fafafa; /* 侧边栏浅灰背景 */
+    border-right: 1px solid #e0e0e0;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+/* 按钮基础样式 */
+QPushButton {
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #333333;
+}
+
+QPushButton:hover {
+    background-color: #e0e0e0;
+}
+
+QPushButton:pressed {
+    background-color: #d0d0d0;
+    border: 1px solid #c0c0c0;
+}
+
+/* 焦点和选择样式 (根据OpenAI的蓝色调) */
+QLineEdit, QTextEdit {
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid #007bff; /* 蓝色焦点边框 */
+}

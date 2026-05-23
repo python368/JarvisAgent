@@ -20,6 +20,11 @@ try:
 except Exception:  # pragma: no cover
     OllamaClient = None
 
+try:
+    from models.google_client import GoogleClient
+except Exception:  # pragma: no cover
+    GoogleClient = None
+
 
 def get_client() -> object:
     """Return an AI client instance based on the current configuration.
@@ -42,4 +47,8 @@ def get_client() -> object:
             raise ImportError("OllamaClient could not be imported")
         ollama_url = cfg.get("ollama_url")
         return OllamaClient(base_url=ollama_url, model=model_name)
+    if provider == "google":
+        if GoogleClient is None:
+            raise ImportError("GoogleClient could not be imported")
+        return GoogleClient(api_key=api_key)
     raise ValueError(f"Unsupported model provider: {provider}")

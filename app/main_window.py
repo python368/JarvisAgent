@@ -2,7 +2,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtWidgets import QGraphicsDropShadowEffect
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QApplication
 
 from app.chat_widget import ChatWidget
 from app.sidebar_widget import SidebarWidget
@@ -24,6 +24,18 @@ class MainWindow(QMainWindow):
         shadow.setColor(QColor(0, 0, 0, 200))
         shadow.setOffset(0, 6)
         self.setGraphicsEffect(shadow)
+
+        self.load_stylesheet("app/styles.qss")
+
+    def load_stylesheet(self, stylesheet_path):
+        """Loads and applies a QSS stylesheet to the application."""
+        try:
+            with open(stylesheet_path, "r", encoding="utf-8") as file:
+                self.setStyleSheet(file.read())
+        except FileNotFoundError:
+            print(f"Error: Stylesheet file not found at {stylesheet_path}")
+        except Exception as e:
+            print(f"Error loading stylesheet: {e}")
 
         self.init_ui()
 

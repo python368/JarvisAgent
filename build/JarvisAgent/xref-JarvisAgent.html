@@ -156,6 +156,9 @@ imports:
  &#8226;   <a href="#keyword">keyword</a>
  &#8226;   <a href="#linecache">linecache</a>
  &#8226;   <a href="#locale">locale</a>
+ &#8226;   <a href="#models.google_client">models.google_client</a>
+ &#8226;   <a href="#models.ollama_client">models.ollama_client</a>
+ &#8226;   <a href="#models.openai_client">models.openai_client</a>
  &#8226;   <a href="#ntpath">ntpath</a>
  &#8226;   <a href="#operator">operator</a>
  &#8226;   <a href="#os">os</a>
@@ -498,6 +501,17 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="'google.generativeai'"></a>
+  <a target="code" href="" type="text/plain"><tt>'google.generativeai'</tt></a>
+<span class="moduletype">MissingModule</span>  <div class="import">
+imported by:
+    <a href="#models.google_client">models.google_client</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="'h2.config'"></a>
   <a target="code" href="" type="text/plain"><tt>'h2.config'</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
@@ -565,6 +579,17 @@ imported by:
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
     <a href="#platform">platform</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="'models.base_client'"></a>
+  <a target="code" href="" type="text/plain"><tt>'models.base_client'</tt></a>
+<span class="moduletype">MissingModule</span>  <div class="import">
+imported by:
+    <a href="#models.google_client">models.google_client</a>
 
   </div>
 
@@ -12346,6 +12371,17 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="google"></a>
+  <a target="code" href="" type="text/plain"><tt>google</tt></a>
+<span class="moduletype">MissingModule</span>  <div class="import">
+imported by:
+    <a href="#models.google_client">models.google_client</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="grp"></a>
   <tt>grp</tt> <span class="moduletype"><tt>/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload/grp.cpython-313-darwin.so</tt></span>  <div class="import">
 imported by:
@@ -16200,9 +16236,33 @@ imported by:
   <a target="code" href="/Users/kangning/Desktop/JarvisAgent/models/__init__.py" type="text/plain"><tt>models</tt></a>
 <span class="moduletype">Package</span>  <div class="import">
 imported by:
-    <a href="#models.model_router">models.model_router</a>
+    <a href="#models.google_client">models.google_client</a>
+ &#8226;   <a href="#models.model_router">models.model_router</a>
  &#8226;   <a href="#models.ollama_client">models.ollama_client</a>
  &#8226;   <a href="#models.openai_client">models.openai_client</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="models.google_client"></a>
+  <a target="code" href="/Users/kangning/Desktop/JarvisAgent/models/google_client.py" type="text/plain"><tt>models.google_client</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#'google.generativeai'">'google.generativeai'</a>
+ &#8226;   <a href="#'models.base_client'">'models.base_client'</a>
+ &#8226;   <a href="#google">google</a>
+ &#8226;   <a href="#models">models</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#typing">typing</a>
+ &#8226;   <a href="#utils.logger">utils.logger</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#main.py">main.py</a>
+ &#8226;   <a href="#models.model_router">models.model_router</a>
 
   </div>
 
@@ -16216,6 +16276,7 @@ imports:
     <a href="#__future__">__future__</a>
  &#8226;   <a href="#config.app_config">config.app_config</a>
  &#8226;   <a href="#models">models</a>
+ &#8226;   <a href="#models.google_client">models.google_client</a>
  &#8226;   <a href="#models.ollama_client">models.ollama_client</a>
  &#8226;   <a href="#models.openai_client">models.openai_client</a>
 
@@ -16243,7 +16304,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#models.model_router">models.model_router</a>
+    <a href="#main.py">main.py</a>
+ &#8226;   <a href="#models.model_router">models.model_router</a>
 
   </div>
 
@@ -16264,7 +16326,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#models.model_router">models.model_router</a>
+    <a href="#main.py">main.py</a>
+ &#8226;   <a href="#models.model_router">models.model_router</a>
 
   </div>
 
@@ -54974,6 +55037,7 @@ imported by:
  &#8226;   <a href="#lzma">lzma</a>
  &#8226;   <a href="#main.py">main.py</a>
  &#8226;   <a href="#mimetypes">mimetypes</a>
+ &#8226;   <a href="#models.google_client">models.google_client</a>
  &#8226;   <a href="#models.openai_client">models.openai_client</a>
  &#8226;   <a href="#multiprocessing.connection">multiprocessing.connection</a>
  &#8226;   <a href="#multiprocessing.context">multiprocessing.context</a>
@@ -66908,6 +66972,7 @@ imported by:
  &#8226;   <a href="#importlib.metadata._meta">importlib.metadata._meta</a>
  &#8226;   <a href="#importlib.resources._common">importlib.resources._common</a>
  &#8226;   <a href="#importlib.resources.abc">importlib.resources.abc</a>
+ &#8226;   <a href="#models.google_client">models.google_client</a>
  &#8226;   <a href="#models.ollama_client">models.ollama_client</a>
  &#8226;   <a href="#models.openai_client">models.openai_client</a>
  &#8226;   <a href="#numpy._typing._array_like">numpy._typing._array_like</a>
@@ -70657,6 +70722,33 @@ imported by:
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
     <a href="#site">site</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="utils"></a>
+  <a target="code" href="/Users/kangning/Desktop/JarvisAgent/utils/__init__.py" type="text/plain"><tt>utils</tt></a>
+<span class="moduletype">Package</span>  <div class="import">
+imported by:
+    <a href="#utils.logger">utils.logger</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="utils.logger"></a>
+  <a target="code" href="/Users/kangning/Desktop/JarvisAgent/utils/logger.py" type="text/plain"><tt>utils.logger</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#utils">utils</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#models.google_client">models.google_client</a>
 
   </div>
 
