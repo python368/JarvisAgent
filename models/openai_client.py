@@ -1,85 +1,134 @@
 # models/openai_client.py
-"""Simple wrapper around the OpenAI API.
+"""OpenAI API client implementation.
 
-This module provides a thin abstraction for making chat completions using the
-`openai` Python package.  The implementation is deliberately lightweight – it
-loads the API key from the project's configuration (see ``config/app_config``)
-and exposes two convenience methods:
-
-* ``chat`` – perform a chat completion given a list of messages.
-* ``list_models`` – return a list of model identifiers that the OpenAI service
-  reports as available.
-
-The wrapper is used by the UI layer (e.g. ``app/chat_widget.py``) to obtain AI
-responses.  Keeping the logic in a separate module makes it easy to replace the
-backend (e.g. with Ollama) without touching the UI code.
+This module provides a complete implementation of the OpenAI chat API client,
+extending the base LLM client interface. It supports both standard and streaming
+chat completions.
 """
 
 from __future__ import annotations
 
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, AsyncGenerator, Optional
 
-import openai
+from openai import OpenAI
 
-# Import the Config class we added earlier.  Importing lazily avoids circular
-# imports if the config module itself imports any model code.
-try:
-    from config.app_config import Config
-except Exception:  # pragma: no cover – fallback for safety during early import
-    Config = None
+from models.base_client import LLMClient
+from config.app_config import Config
 
 
-class OpenAIClient:
-    """A minimal client for OpenAI chat completions.
-
-    The client reads the API key from ``Config`` (or the ``OPENAI_API_KEY``
-    environment variable) and provides a simple ``chat`` method that returns the
-    assistant's reply as a string.
+class OpenAIClient(LLMClient):
+    """Client for OpenAI chat completions.
+    
+    Parameters
+    ----------
+    api_key : str
+        OpenAI API key for authentication.
+    model : str, optional
+        Model name to use for chat completions (default: 'gpt-4o-mini').
     """
 
-    def __init__(self, api_key: str, model: str) -> None:
-        # API key and model are now guaranteed to be provided by model_router.
-        self.api_key = api_key
+    DEFAULT_MODELS = [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4-turbo",
+        "gpt-4",
+        "gpt-3.5-turbo",
+    ]
+
+    def __init__(self, api_key: str, model: str = "gpt-4o-mini") -> None:
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self.model = model
-        openai.api_key = self.api_key
+        self._client = OpenAI(api_key=self.api_key)
 
-    def chat(self, messages: List[Dict[str, str]], model: str | None = None) -> str:
-        """Send a list of messages to the OpenAI chat endpoint."""
+    @property
+    def provider_name(self) -> str:
+        return "openai"
 
-        # parameters:
-        #     A list of dictionaries with ``role`` ("system", "user", "assistant")
-        #     and ``content`` keys, following the OpenAI chat
+    @property
+    def supported_models(self) -> List[str]:
+        return self.DEFAULT_MODELS
 
-        #     completion format.
-        # model:
-        #     The model to use for the chat completion. If not provided, the
-        #     client's default model will be used.
-        response = openai.chat.completions.create(
-            model=model or self.model, messages=messages, temperature=0
+    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        """Send a list of messages to the OpenAI chat endpoint.
+        
+        Args:
+            messages: List of message dicts with 'role' and 'content' keys.
+            **kwargs: Additional parameters (model override, temperature, etc.)
+            
+        Returns:
+            The assistant's reply as a string.
+        """
+        model = kwargs.get("model", self.model)
+        temperature = kwargs.get("temperature", 0.7)
+        
+        response = self._client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
         )
         return response.choices[0].message.content or ""
 
+    async def chat_stream(self, messages: List[Dict[str, str]], **kwargs) -> AsyncGenerator[str, None]:
+        """Send a streaming chat completion request.
+        
+        Args:
+            messages: List of message dicts with 'role' and 'content' keys.
+            **kwargs: Additional parameters.
+            
+        Yields:
+            Chunks of the assistant's response as they arrive.
+        """
+        model = kwargs.get("model", self.model)
+        temperature = kwargs.get("temperature", 0.7)
+        
+        stream = self._client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            stream=True,
+        )
+        for chunk in stream:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+
     def list_models(self) -> List[str]:
-        """Return a list of available models for the given provider."""
+        """Return a list of available models for OpenAI.
+        
+        Returns:
+            Sorted list of model identifiers.
+        """
+        try:
+            models = self._client.models.list()
+            return sorted([m.id for m in models.data])
+        except Exception:
+            return self.DEFAULT_MODELS
 
-        return sorted([m.id for m in openai.models.list().data])
+    def test_connection(self) -> bool:
+        """Test the connection to OpenAI API.
+        
+        Returns:
+            True if connection is successful, False otherwise.
+        """
+        try:
+            self._client.models.list()
+            return True
+        except Exception:
+            return False
 
 
-_client: OpenAIClient | None = None
-
-
-def get_client(api_key: str | None = None, model: str | None = None) -> OpenAIClient:
-    """Return a cached OpenAI client instance."""
-
-    # If parameters are given, always create a fresh client.  This is useful
-    # when the user changes their settings via the UI.
-    if api_key or model:
-        return OpenAIClient(api_key, model)
-
-    # Otherwise, return the cached instance (or create it with defaults).
-    global _client
-    if _client is None:
-        cfg = Config()
-        _client = OpenAIClient(cfg.get("api_key"), cfg.get("model_name"))
-    return _client
+def get_client(api_key: Optional[str] = None, model: Optional[str] = None) -> OpenAIClient:
+    """Factory function to get an OpenAI client instance.
+    
+    Args:
+        api_key: Optional API key override.
+        model: Optional model override.
+        
+    Returns:
+        Configured OpenAIClient instance.
+    """
+    cfg = Config()
+    return OpenAIClient(
+        api_key=api_key or cfg.get("api_key", ""),
+        model=model or cfg.get("model_name", "gpt-4o-mini"),
+    )

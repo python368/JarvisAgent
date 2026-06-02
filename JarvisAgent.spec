@@ -1,54 +1,69 @@
 # -*- mode: python ; coding: utf-8 -*-
+"""
+PyInstaller spec for JarvisAgent macOS application.
+"""
 
+import os
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
+block_cipher = None
+
+APP_NAME = "JarvisAgent"
+APP_VERSION = "2.0.0"
+BUNDLE_IDENTIFIER = "com.jarvisagent.app"
+
+datas = [('app/styles.qss', 'app')]
+
+hiddenimports = [
+    'PyQt6', 'PyQt6.QtCore', 'PyQt6.QtGui', 'PyQt6.QtWidgets', 'PyQt6.sip',
+    'models.base_client', 'models.openai_client', 'models.anthropic_client',
+    'models.ollama_client', 'models.google_client', 'models.model_router',
+    'tools.screenshot', 'tools.mouse', 'tools.keyboard', 'tools.app_control',
+    'tools.file_manager', 'agent.agent', 'agent.planner', 'agent.task_manager',
+    'agent.dialog_manager', 'agent.memory', 'config.app_config', 'utils.logger',
+    'openai', 'anthropic', 'google.generativeai', 'mss', 'PIL', 'pyautogui', 'requests',
+]
+
+for mod in ['PyQt6', 'openai', 'anthropic', 'google']:
+    try:
+        hiddenimports.extend(collect_submodules(mod))
+    except Exception:
+        pass
+
+for pkg in ['PyQt6', 'openai', 'anthropic']:
+    try:
+        datas.extend(collect_data_files(pkg))
+    except Exception:
+        pass
 
 a = Analysis(
     ['main.py'],
-    pathex=[],
-    binaries=[],
-    datas=[('app/styles.qss', 'app')],
-    hiddenimports=[
-        'models.openai_client',
-        'models.ollama_client',
-        'models.google_client',
-    ],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    noarchive=False,
-    optimize=0,
+    pathex=[os.path.dirname(os.path.abspath(__file__))],
+    binaries=[], datas=datas, hiddenimports=hiddenimports,
+    hookspath=[], runtime_hooks=[],
+    excludes=['tkinter', 'matplotlib', 'IPython', 'notebook'],
+    cipher=block_cipher, noarchive=False,
 )
-pyz = PYZ(a.pure)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
-    pyz,
-    a.scripts,
-    [],
-    exclude_binaries=True,
-    name='JarvisAgent',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
+    pyz, a.scripts, a.binaries, a.zipfiles, a.datas, [],
+    name='JarvisAgent', debug=False, strip=False, upx=True,
+    console=False, argv_emulation=True,
 )
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='JarvisAgent',
-)
+
 app = BUNDLE(
-    coll,
-    name='JarvisAgent.app',
-    icon=None,
-    bundle_identifier=None,
+    exe, name=f'{APP_NAME}.app', bundle_identifier=BUNDLE_IDENTIFIER,
+    info_plist={
+        'CFBundleName': APP_NAME, 'CFBundleDisplayName': 'Jarvis Agent',
+        'CFBundleIdentifier': BUNDLE_IDENTIFIER,
+        'CFBundleVersion': APP_VERSION, 'CFBundleShortVersionString': APP_VERSION,
+        'CFBundlePackageType': 'APPL', 'CFBundleExecutable': 'JarvisAgent',
+        'LSMinimumSystemVersion': '10.15', 'NSHighResolutionCapable': True,
+        'NSPrincipalClass': 'NSApplication',
+        'NSHumanReadableCopyright': 'Copyright 2024 Jarvis Agent.',
+        'LSApplicationCategoryType': 'public.app-category.productivity',
+        'NSSupportsAutomaticTermination': True, 'NSSupportsSuddenTermination': False,
+    },
 )
