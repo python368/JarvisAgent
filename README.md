@@ -1,161 +1,144 @@
-# Jarvis Agent V2
+# JarvisAgent V2
 
-An elite, autonomous AI agent for computer control, built with PyQt6 and supporting multiple LLM providers.
+AI 计算机控制代理 for macOS - 开箱即用 🚀
 
-## 🎯 Core Mission
+## ⚡ 快速开始
 
-Jarvis is designed to use AI to operate computers like a human:
-- **Observe** the screen through vision models
-- **Understand** current computer state
-- **Think** about goals and plan actions
-- **Execute** mouse and keyboard controls
-- **Complete** real-world computer tasks autonomously
-
-## ✨ Features
-
-### Multi-Provider LLM Support
-- **OpenAI**: GPT-4o, GPT-4o-mini, GPT-4, GPT-3.5-turbo
-- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
-- **Google**: Gemini 2.0 Flash, Gemini 1.5 Pro
-- **Ollama**: Run open-source models locally (Llama, Mistral, etc.)
-
-### Computer Control Tools
-- **Screenshot**: Full screen and region capture
-- **Mouse**: Move, click, scroll, drag operations
-- **Keyboard**: Typing, hotkeys, special key presses
-- **App Control**: Launch apps, switch windows, manage UI
-
-### Agent Capabilities
-- **Planning**: Task decomposition into executable steps
-- **Memory**: Short-term conversation context + long-term persistent storage
-- **Execution**: Action verification and retry mechanisms
-- **Dialog**: Natural conversation management
-
-### Modern UI
-- Dark theme with glass-morphism effects
-- Streaming AI responses
-- Real-time status indicators
-- Intuitive settings management
-
-## 📁 Project Structure
-
-```
-JarvisAgent/
-├── agent/              # Core agent logic
-│   ├── agent.py        # Main ComputerAgent class
-│   ├── planner.py      # Task planning
-│   ├── task_manager.py # Task execution management
-│   ├── dialog_manager.py # Conversation handling
-│   └── memory.py       # Short and long-term memory
-├── app/               # PyQt6 GUI
-│   ├── main_window.py  # Main application window
-│   ├── chat_widget.py  # Chat interface with streaming
-│   ├── sidebar_widget.py # Navigation sidebar
-│   └── settings_window.py # Configuration UI
-├── models/             # LLM client implementations
-│   ├── base_client.py  # Abstract interface
-│   ├── openai_client.py
-│   ├── anthropic_client.py
-│   ├── ollama_client.py
-│   ├── google_client.py
-│   └── model_router.py # Provider routing
-├── tools/              # Computer control tools
-│   ├── screenshot.py   # Screen capture
-│   ├── mouse.py       # Mouse control
-│   ├── keyboard.py     # Keyboard control
-│   ├── app_control.py  # Application management
-│   └── file_manager.py # File operations
-├── config/             # Configuration
-│   └── app_config.py   # Settings management
-├── tests/              # Test suite
-├── main.py             # Application entry point
-└── requirements.txt    # Dependencies
-```
-
-## 🚀 Installation
+### 方式一：一键安装（推荐）
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-repo/JarvisAgent.git
-cd JarvisAgent
+# 下载项目后，在终端运行：
+chmod +x install.sh
+./install.sh
+```
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# or: venv\Scripts\activate  # Windows
+安装完成后，运行：
+```bash
+source venv/bin/activate
+python main.py
+```
 
-# Install dependencies
+### 方式二：手动安装
+
+```bash
+# 1. 创建虚拟环境
+python3 -m venv venv
+source venv/bin/activate
+
+# 2. 安装依赖
 pip install -r requirements.txt
+
+# 3. 运行
+python main.py
 ```
 
-## 🔧 Configuration
+### 方式三：打包应用安装
 
-1. **Launch the application**
-2. **Open Settings** (⚙️ button in sidebar)
-3. **Configure your LLM provider**:
-   - For cloud providers (OpenAI, Anthropic, Google): Enter your API key
-   - For Ollama: Ensure the server is running locally
-4. **Select active provider** and model
-5. **Save settings**
-
-## 💻 Usage
-
-### Basic Chat
-1. Type your request in the chat input
-2. Press Enter or click Send
-3. Jarvis will respond and execute tasks
-
-### Computer Control Tasks
-Example tasks Jarvis can handle:
-- "Open Safari and search for..."
-- "Click the button in the top-right corner"
-- "Create a new folder called Projects"
-- "Open the settings and change the theme to dark"
-
-### Provider Switching
-Use Settings to switch between:
-- **OpenAI**: Fast, reliable, good vision
-- **Anthropic**: Excellent reasoning, long context
-- **Google**: Free tier available, good performance
-- **Ollama**: Privacy-focused, runs locally
-
-## 🔨 Building for Distribution
-
+下载源码后构建 .app：
 ```bash
-# Install PyInstaller
-pip install pyinstaller
-
-# Build the application
-pyinstaller JarvisAgent.spec
-
-# The .app bundle will be in dist/JarvisAgent.app
+chmod +x build.sh
+./build.sh
 ```
 
-## 📋 Requirements
-
-- Python 3.10+
-- PyQt6 6.6+
-- Supported LLM providers or Ollama
-
-## ⚠️ macOS Permissions
-
-For full functionality, Jarvis needs:
-- **Accessibility**: Required for mouse/keyboard control
-- **Screen Recording**: Required for screenshots
-
-Grant these in System Settings > Privacy & Security > Accessibility/Screen Recording
-
-## 🧪 Testing
-
-```bash
-# Run test suite
-python -m pytest tests/ -v
-```
-
-## 📄 License
-
-MIT License - See LICENSE file for details
+构建成功后，双击 `dist/JarvisAgent.app` 即可运行。
 
 ---
 
-*Jarvis: Your AI-powered computer assistant* 🤖
+## ✨ 功能
+
+### 🤖 AI 模型支持
+- **OpenAI**: GPT-4o, GPT-4o-mini, GPT-4
+- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Opus
+- **Google**: Gemini 2.0 Flash, Gemini 1.5 Pro
+- **Ollama**: 本地运行开源模型（Llama, Mistral 等）
+
+### 🖥️ 计算机控制
+- 截图捕获
+- 鼠标控制（移动、点击、滚动）
+- 键盘控制（打字、快捷键）
+- 应用启动和窗口管理
+
+### 🎨 界面
+- 深色主题
+- 流式响应
+- 现代化 UI
+
+---
+
+## 📋 依赖要求
+
+- macOS 10.15+ (Apple Silicon 或 Intel)
+- Python 3.10+
+
+---
+
+## ⚙️ 配置
+
+首次运行后，在设置中配置你的 API Key：
+
+1. 点击左侧 "⚙️ 设置"
+2. 选择你的 AI 提供商
+3. 输入 API Key
+4. 保存
+
+---
+
+## 🔧 开发
+
+```bash
+# 开发模式安装
+pip install -e .
+
+# 运行测试
+python -m pytest tests/ -v
+
+# 构建 .app
+./build.sh
+```
+
+---
+
+## 📁 项目结构
+
+```
+JarvisAgent/
+├── main.py              # 应用入口
+├── requirements.txt     # 依赖列表
+├── setup.py            # 安装配置
+├── install.sh         # 一键安装脚本
+├── build.sh           # 构建脚本
+├── agent/              # AI 代理核心
+├── app/               # PyQt6 GUI
+├── models/             # LLM 客户端
+├── tools/              # 计算机控制工具
+├── config/            # 配置管理
+└── tests/              # 测试套件
+```
+
+---
+
+## ⚠️ 权限说明
+
+macOS 需要以下权限才能正常工作：
+
+| 权限 | 用途 | 授予位置 |
+|------|------|----------|
+| 辅助功能 | 鼠标/键盘控制 | 系统设置 > 隐私与安全 > 辅助功能 |
+| 屏幕录制 | 截图功能 | 系统设置 > 隐私与安全 > 屏幕录制 |
+
+---
+
+## 🐛 故障排除
+
+**Q: 提示 "无法打开，因为来自身份不明的开发者"**
+A: 在 macOS 设置中允许：系统设置 > 隐私与安全 > 安全性 > 仍要打开
+
+**Q: 截图不工作**
+A: 确保已在系统设置中授予屏幕录制权限
+
+**Q: 鼠标/键盘不响应**
+A: 确保已在系统设置中授予辅助功能权限
+
+---
+
+MIT License - 2024 JarvisAgent
