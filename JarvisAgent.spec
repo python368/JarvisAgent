@@ -12,7 +12,7 @@ APP_NAME = "JarvisAgent"
 APP_VERSION = "2.0.0"
 BUNDLE_IDENTIFIER = "com.jarvisagent.app"
 
-datas = [('app/styles.qss', 'app')]
+datas = []
 
 hiddenimports = [
     'PyQt6', 'PyQt6.QtCore', 'PyQt6.QtGui', 'PyQt6.QtWidgets', 'PyQt6.sip',
@@ -21,16 +21,17 @@ hiddenimports = [
     'tools.screenshot', 'tools.mouse', 'tools.keyboard', 'tools.app_control',
     'tools.file_manager', 'agent.agent', 'agent.planner', 'agent.task_manager',
     'agent.dialog_manager', 'agent.memory', 'config.app_config', 'utils.logger',
-    'openai', 'anthropic', 'google.generativeai', 'mss', 'PIL', 'pyautogui', 'requests',
+    'openai', 'anthropic', 'google.generativeai', 'google.genai', 'mss', 'PIL', 'pyautogui', 'requests',
+    'numpy', 'certifi', 'charset_normalizer', 'idna', 'urllib3', 'jiter',
 ]
 
-for mod in ['PyQt6', 'openai', 'anthropic', 'google']:
+for mod in ['PyQt6', 'openai', 'anthropic', 'google', 'mss', 'numpy', 'PIL']:
     try:
         hiddenimports.extend(collect_submodules(mod))
     except Exception:
         pass
 
-for pkg in ['PyQt6', 'openai', 'anthropic']:
+for pkg in ['PyQt6', 'openai', 'anthropic', 'google']:
     try:
         datas.extend(collect_data_files(pkg))
     except Exception:
@@ -56,14 +57,19 @@ exe = EXE(
 app = BUNDLE(
     exe, name=f'{APP_NAME}.app', bundle_identifier=BUNDLE_IDENTIFIER,
     info_plist={
-        'CFBundleName': APP_NAME, 'CFBundleDisplayName': 'Jarvis Agent',
+        'CFBundleName': APP_NAME,
+        'CFBundleDisplayName': 'Jarvis Agent',
         'CFBundleIdentifier': BUNDLE_IDENTIFIER,
-        'CFBundleVersion': APP_VERSION, 'CFBundleShortVersionString': APP_VERSION,
-        'CFBundlePackageType': 'APPL', 'CFBundleExecutable': 'JarvisAgent',
-        'LSMinimumSystemVersion': '10.15', 'NSHighResolutionCapable': True,
+        'CFBundleVersion': APP_VERSION,
+        'CFBundleShortVersionString': APP_VERSION,
+        'CFBundlePackageType': 'APPL',
+        'CFBundleExecutable': 'JarvisAgent',
+        'LSMinimumSystemVersion': '10.15',
+        'NSHighResolutionCapable': True,
         'NSPrincipalClass': 'NSApplication',
         'NSHumanReadableCopyright': 'Copyright 2024 Jarvis Agent.',
         'LSApplicationCategoryType': 'public.app-category.productivity',
-        'NSSupportsAutomaticTermination': True, 'NSSupportsSuddenTermination': False,
+        'NSSupportsAutomaticTermination': True,
+        'NSSupportsSuddenTermination': False,
     },
 )

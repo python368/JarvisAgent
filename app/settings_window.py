@@ -1,323 +1,342 @@
 # app/settings_window.py
-"""Settings window for configuring Jarvis Agent."""
+"""Settings window for JarvisAgent configuration."""
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QFormLayout, QLineEdit, QComboBox,
-    QPushButton, QLabel, QTabWidget, QWidget, QGroupBox,
-    QHBoxLayout, QCheckBox, QSpinBox, QMessageBox
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
+                             QLineEdit, QPushButton, QComboBox, QTabWidget, 
+                             QWidget, QFormLayout, QGroupBox, QScrollArea,
+                             QMessageBox)
+from PyQt6.QtGui import QFont
 
 from config.app_config import Config
-from models.model_router import get_client, get_available_providers, get_provider_info
+from models.model_router import get_available_providers
 
 
 class SettingsWindow(QDialog):
-    """Settings dialog for API keys, providers, and preferences."""
+    """Settings dialog for configuring JarvisAgent."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.config = Config()
         self.setWindowTitle("设置")
-        self.setObjectName("settings")
-        self.setModal(True)
-        self.resize(500, 450)
-        
-        # Frameless with shadow
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        
-        self._config = Config()
-        self._init_ui()
-        self._load_config()
+        self.setFixedSize(560, 500)
+        self.setStyleSheet("""
+            QDialog {
+                background: rgba(20, 20, 35, 0.98);
+            }
+        """)
+        self.init_ui()
 
-    def _init_ui(self):
+    def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Title
-        title = QLabel("⚙️ 设置")
-        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #e0e0ff; margin-bottom: 15px;")
-        layout.addWidget(title)
-        
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        # Header
+        header = QLabel("⚙️ 设置")
+        header.setStyleSheet("""
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            padding-bottom: 10px;
+        """)
+        layout.addWidget(header)
+
         # Tab widget
         tabs = QTabWidget()
-        tabs.addTab(self._create_provider_tab(), "模型提供商")
-        tabs.addTab(self._create_general_tab(), "通用设置")
-        tabs.addTab(self._create_appearance_tab(), "外观")
-        layout.addWidget(tabs)
-        
+        tabs.setStyleSheet("""
+            QTabWidget::pane {
+                background: rgba(30, 30, 50, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 16px;
+            }
+            QTabBar::tab {
+                background: transparent;
+                color: rgba(255, 255, 255, 0.6);
+                padding: 12px 24px;
+                font-size: 14px;
+                border: none;
+            }
+            QTabBar::tab:selected {
+                color: #ffffff;
+                background: rgba(99, 102, 241, 0.2);
+                border-radius: 8px;
+            }
+            QTabBar::tab:hover:!selected {
+                background: rgba(255, 255, 255, 0.05);
+            }
+        """)
+
+        # Provider settings tab
+        provider_tab = self._create_provider_tab()
+        tabs.addTab(provider_tab, "🤖 AI 模型")
+
+        # General settings tab
+        general_tab = self._create_general_tab()
+        tabs.addTab(general_tab, "⚡ 通用")
+
+        layout.addWidget(tabs, 1)
+
         # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
-        
-        self.cancel_btn = QPushButton("取消")
-        self.cancel_btn.clicked.connect(self.reject)
-        self.save_btn = QPushButton("保存")
-        self.save_btn.setStyleSheet("""
+
+        self.btn_save = QPushButton("保存设置")
+        self.btn_save.setFixedSize(120, 42)
+        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_save.setStyleSheet("""
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #4caf50, stop:1 #388e3c);
-                min-width: 80px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #6366f1, stop:1 #8b5cf6);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 600;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #5cbf60, stop:1 #489e4c);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #7c7ff2, stop:1 #9b7cf7);
             }
         """)
-        self.save_btn.clicked.connect(self._save_config)
-        
-        btn_layout.addWidget(self.cancel_btn)
-        btn_layout.addWidget(self.save_btn)
-        layout.addLayout(btn_layout)
-        
-        self.setStyleSheet("""
-            QDialog#settings {
-                background: rgba(25, 25, 35, 0.98);
-                border-radius: 12px;
-            }
-            QTabWidget::pane {
-                border: none;
-                background: transparent;
-            }
-            QTabBar::tab {
-                background: rgba(40, 44, 55, 0.5);
-                color: #a0a0b0;
-                padding: 10px 20px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-                margin-right: 2px;
-            }
-            QTabBar::tab:selected {
-                background: rgba(60, 64, 75, 0.8);
-                color: #e0e0ff;
-            }
-            QTabBar::tab:hover:selected {
-                background: rgba(70, 74, 85, 0.8);
-            }
-            QLabel {
-                color: #c0c0d0;
-            }
-            QLineEdit, QComboBox, QSpinBox {
-                background: rgba(40, 44, 55, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                border-radius: 6px;
-                padding: 8px 12px;
-                color: #e0e0ff;
-            }
-            QLineEdit:focus, QComboBox:focus {
-                border: 1px solid #5a9cff;
-            }
+        self.btn_save.clicked.connect(self.save_settings)
+        btn_layout.addWidget(self.btn_save)
+
+        self.btn_cancel = QPushButton("取消")
+        self.btn_cancel.setFixedSize(100, 42)
+        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_cancel.setStyleSheet("""
             QPushButton {
-                background: rgba(60, 64, 75, 0.8);
-                border: none;
-                border-radius: 6px;
-                padding: 10px 20px;
-                color: #e0e0ff;
+                background: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.8);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 10px;
+                font-size: 14px;
             }
             QPushButton:hover {
-                background: rgba(70, 74, 85, 0.9);
+                background: rgba(255, 255, 255, 0.15);
             }
+        """)
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_layout.addWidget(self.btn_cancel)
+
+        layout.addLayout(btn_layout)
+
+    def _create_provider_tab(self) -> QWidget:
+        """Create provider settings tab."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setSpacing(20)
+
+        # Provider selection
+        provider_group = QGroupBox("AI 提供商")
+        provider_group.setStyleSheet("""
             QGroupBox {
-                color: #a0a0b0;
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 600;
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 10px;
+                border-radius: 12px;
+                padding: 16px;
+                margin-top: 8px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
+                left: 16px;
+                padding: 0 8px;
             }
         """)
 
-    def _create_provider_tab(self) -> QWidget:
-        """Create provider configuration tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
+        provider_layout = QFormLayout(provider_group)
+        provider_layout.setSpacing(16)
+        provider_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+
+        # Provider dropdown
+        self.provider_combo = QComboBox()
+        self.provider_combo.setFixedHeight(44)
+        providers = get_available_providers()
+        self.provider_combo.addItems(providers)
         
-        # OpenAI settings
-        openai_group = QGroupBox("OpenAI")
-        openai_layout = QFormLayout()
-        self.openai_key = QLineEdit()
-        self.openai_key.setPlaceholderText("sk-...")
-        self.openai_key.setEchoMode(QLineEdit.EchoMode.Password)
-        self.openai_model = QComboBox()
-        self.openai_model.addItems(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"])
-        openai_layout.addRow("API Key:", self.openai_key)
-        openai_layout.addRow("模型:", self.openai_model)
-        openai_group.setLayout(openai_layout)
-        layout.addWidget(openai_group)
+        current_provider = self.config.get("model_provider", "OpenAI")
+        if current_provider in providers:
+            self.provider_combo.setCurrentText(current_provider)
         
-        # Anthropic settings
-        anthropic_group = QGroupBox("Anthropic Claude")
-        anthropic_layout = QFormLayout()
-        self.anthropic_key = QLineEdit()
-        self.anthropic_key.setPlaceholderText("sk-ant-...")
-        self.anthropic_key.setEchoMode(QLineEdit.EchoMode.Password)
-        self.anthropic_model = QComboBox()
-        self.anthropic_model.addItems(["claude-3-5-sonnet-20241022", "claude-3-5-sonnet-20240620", 
-                                       "claude-3-opus-20240229", "claude-3-haiku-20240307"])
-        anthropic_layout.addRow("API Key:", self.anthropic_key)
-        anthropic_layout.addRow("模型:", self.anthropic_model)
-        anthropic_group.setLayout(anthropic_layout)
-        layout.addWidget(anthropic_group)
+        self.provider_combo.setStyleSheet("""
+            QComboBox {
+                background: rgba(50, 50, 75, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 10px;
+                padding: 0 16px;
+                color: #ffffff;
+                font-size: 14px;
+                min-width: 200px;
+            }
+            QComboBox:hover {
+                border-color: rgba(99, 102, 241, 0.5);
+            }
+            QComboBox::drop-down {
+                border: none;
+                padding-right: 12px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid rgba(255, 255, 255, 0.5);
+                margin-right: 10px;
+            }
+            QComboBox QAbstractItemView {
+                background: rgba(40, 40, 65, 0.98);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                selection-background-color: rgba(99, 102, 241, 0.4);
+                padding: 8px;
+            }
+        """)
+        provider_layout.addRow("选择提供商:", self.provider_combo)
+
+        # API Key input
+        self.api_key_input = QLineEdit()
+        self.api_key_input.setFixedHeight(44)
+        self.api_key_input.setPlaceholderText("输入您的 API Key")
+        self.api_key_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.api_key_input.setText(self.config.get("api_key", ""))
+        self.api_key_input.setStyleSheet("""
+            QLineEdit {
+                background: rgba(50, 50, 75, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 10px;
+                padding: 0 16px;
+                color: #ffffff;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border-color: #6366f1;
+            }
+            QLineEdit:placeholder {
+                color: rgba(255, 255, 255, 0.4);
+            }
+        """)
+        provider_layout.addRow("API Key:", self.api_key_input)
+
+        # Ollama URL (shown for Ollama provider)
+        self.ollama_layout = QFormLayout()
+        self.ollama_url_input = QLineEdit()
+        self.ollama_url_input.setFixedHeight(44)
+        self.ollama_url_input.setPlaceholderText("http://localhost:11434")
+        self.ollama_url_input.setText(self.config.get("ollama_url", "http://localhost:11434"))
+        self.ollama_url_input.setStyleSheet("""
+            QLineEdit {
+                background: rgba(50, 50, 75, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 10px;
+                padding: 0 16px;
+                color: #ffffff;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border-color: #6366f1;
+            }
+        """)
+        self.ollama_layout.addRow("服务器地址:", self.ollama_url_input)
         
-        # Ollama settings
-        ollama_group = QGroupBox("Ollama (本地)")
-        ollama_layout = QFormLayout()
-        self.ollama_url = QLineEdit()
-        self.ollama_url.setPlaceholderText("http://localhost:11434")
-        self.ollama_model = QLineEdit()
-        self.ollama_model.setPlaceholderText("llama3.2")
-        ollama_layout.addRow("服务器地址:", self.ollama_url)
-        ollama_layout.addRow("模型:", self.ollama_model)
-        ollama_group.setLayout(ollama_layout)
-        layout.addWidget(ollama_group)
-        
-        # Google settings
-        google_group = QGroupBox("Google Gemini")
-        google_layout = QFormLayout()
-        self.google_key = QLineEdit()
-        self.google_key.setPlaceholderText("Google API Key")
-        self.google_key.setEchoMode(QLineEdit.EchoMode.Password)
-        self.google_model = QComboBox()
-        self.google_model.addItems(["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"])
-        google_layout.addRow("API Key:", self.google_key)
-        google_layout.addRow("模型:", self.google_model)
-        google_group.setLayout(google_layout)
-        layout.addWidget(google_group)
-        
-        # Active provider selection
-        provider_select = QGroupBox("激活的提供商")
-        provider_layout = QFormLayout()
-        self.active_provider = QComboBox()
-        self.active_provider.addItems(get_available_providers())
-        self.active_provider.currentIndexChanged.connect(self._on_provider_changed)
-        provider_layout.addRow("使用:", self.active_provider)
-        provider_select.setLayout(provider_layout)
-        layout.addWidget(provider_select)
-        
+        layout.addWidget(provider_group)
+
+        # Model selection
+        model_group = QGroupBox("模型选择")
+        model_group.setStyleSheet("""
+            QGroupBox {
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 600;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 16px;
+                margin-top: 8px;
+            }
+        """)
+
+        model_layout = QFormLayout(model_group)
+        model_layout.setSpacing(16)
+
+        self.model_combo = QComboBox()
+        self.model_combo.setFixedHeight(44)
+        self._update_model_list()
+        self.model_combo.setStyleSheet("""
+            QComboBox {
+                background: rgba(50, 50, 75, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 10px;
+                padding: 0 16px;
+                color: #ffffff;
+                font-size: 14px;
+                min-width: 200px;
+            }
+            QComboBox QAbstractItemView {
+                background: rgba(40, 40, 65, 0.98);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                selection-background-color: rgba(99, 102, 241, 0.4);
+            }
+        """)
+        model_layout.addRow("选择模型:", self.model_combo)
+
+        layout.addWidget(model_group)
         layout.addStretch()
+
+        # Connect provider change
+        self.provider_combo.currentTextChanged.connect(self._on_provider_changed)
+
         return widget
 
     def _create_general_tab(self) -> QWidget:
         """Create general settings tab."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
-        
-        # Agent settings
-        agent_group = QGroupBox("代理设置")
-        agent_layout = QFormLayout()
-        self.max_retries = QSpinBox()
-        self.max_retries.setRange(1, 10)
-        self.max_retries.setValue(3)
-        self.max_steps = QSpinBox()
-        self.max_steps.setRange(10, 200)
-        self.max_steps.setValue(50)
-        self.auto_screenshot = QCheckBox("自动截取屏幕")
-        self.auto_screenshot.setChecked(True)
-        agent_layout.addRow("最大重试次数:", self.max_retries)
-        agent_layout.addRow("最大步数:", self.max_steps)
-        agent_layout.addRow("", self.auto_screenshot)
-        agent_group.setLayout(agent_layout)
-        layout.addWidget(agent_group)
-        
-        # Connection settings
-        conn_group = QGroupBox("连接设置")
-        conn_layout = QFormLayout()
-        self.connection_timeout = QSpinBox()
-        self.connection_timeout.setRange(10, 300)
-        self.connection_timeout.setValue(60)
-        self.connection_timeout.setSuffix(" 秒")
-        conn_layout.addRow("超时时间:", self.connection_timeout)
-        conn_group.setLayout(conn_layout)
-        layout.addWidget(conn_group)
-        
-        layout.addStretch()
-        return widget
+        layout.setSpacing(16)
 
-    def _create_appearance_tab(self) -> QWidget:
-        """Create appearance settings tab."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
-        
-        info = QLabel("外观设置将很快推出...\n\n当前版本使用深色主题。")
-        info.setStyleSheet("color: #888; font-size: 14px; padding: 20px;")
-        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        info = QLabel("通用设置功能开发中...\n\n当前版本支持基本的模型配置。")
+        info.setStyleSheet("""
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            line-height: 1.8;
+        """)
         layout.addWidget(info)
-        
         layout.addStretch()
+
         return widget
 
-    def _load_config(self):
-        """Load configuration into UI."""
-        # OpenAI
-        self.openai_key.setText(self._config.get("api_key", ""))
-        self.openai_model.setCurrentText(self._config.get("model_name", "gpt-4o-mini"))
-        
-        # Anthropic
-        self.anthropic_key.setText(self._config.get("anthropic_api_key", ""))
-        self.anthropic_model.setCurrentText(self._config.get("anthropic_model", "claude-3-5-sonnet-20241022"))
-        
-        # Ollama
-        self.ollama_url.setText(self._config.get("ollama_url", "http://localhost:11434"))
-        self.ollama_model.setText(self._config.get("ollama_model", "llama3.2"))
-        
-        # Google
-        self.google_key.setText(self._config.get("google_api_key", ""))
-        self.google_model.setCurrentText(self._config.get("google_model", "gemini-2.0-flash"))
-        
-        # Active provider
-        provider = self._config.get("model_provider", "OpenAI")
-        idx = self.active_provider.findText(provider)
-        if idx >= 0:
-            self.active_provider.setCurrentIndex(idx)
-        
-        # General settings
-        self.max_retries.setValue(self._config.get("max_retries", 3))
-        self.max_steps.setValue(self._config.get("max_steps", 50))
-        self.connection_timeout.setValue(self._config.get("connection_timeout", 60))
+    def _on_provider_changed(self, provider: str):
+        """Handle provider change."""
+        self._update_model_list()
 
-    def _save_config(self):
-        """Save configuration from UI."""
-        # OpenAI
-        self._config.set("api_key", self.openai_key.text().strip())
-        self._config.set("model_name", self.openai_model.currentText())
+    def _update_model_list(self):
+        """Update available models based on selected provider."""
+        self.model_combo.clear()
         
-        # Anthropic
-        self._config.set("anthropic_api_key", self.anthropic_key.text().strip())
-        self._config.set("anthropic_model", self.anthropic_model.currentText())
+        provider = self.provider_combo.currentText()
+        models = {
+            "OpenAI": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"],
+            "Anthropic": ["claude-3-5-sonnet-20241022", "claude-3-5-sonnet-latest", "claude-3-opus-latest", "claude-3-haiku-latest"],
+            "Google": ["gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro"],
+            "Ollama": ["llama3.2", "llama3.1", "mistral", "codellama", "qwen2.5"],
+        }
         
-        # Ollama
-        self._config.set("ollama_url", self.ollama_url.text().strip())
-        self._config.set("ollama_model", self.ollama_model.text().strip())
+        model_list = models.get(provider, [])
+        self.model_combo.addItems(model_list)
         
-        # Google
-        self._config.set("google_api_key", self.google_key.text().strip())
-        self._config.set("google_model", self.google_model.currentText())
+        # Set current model
+        current_model = self.config.get("model_name", "")
+        if current_model in model_list:
+            self.model_combo.setCurrentText(current_model)
+
+    def save_settings(self):
+        """Save settings to config."""
+        self.config.set("model_provider", self.provider_combo.currentText())
+        self.config.set("model_name", self.model_combo.currentText())
+        self.config.set("api_key", self.api_key_input.text())
+        self.config.set("ollama_url", self.ollama_url_input.text())
+        self.config.save()
         
-        # Active provider
-        self._config.set("model_provider", self.active_provider.currentText())
-        
-        # General
-        self._config.set("max_retries", self.max_retries.value())
-        self._config.set("max_steps", self.max_steps.value())
-        self._config.set("connection_timeout", self.connection_timeout.value())
-        
-        QMessageBox.information(self, "设置", "设置已保存！")
+        QMessageBox.information(self, "保存成功", "设置已保存！\n\n请重启应用以使更改生效。")
         self.accept()
-
-    def _on_provider_changed(self, index):
-        """Handle provider selection change."""
-        provider = self.active_provider.currentText()
-        info = get_provider_info(provider)
-        
-        if info.get("requires_api_key", False):
-            # Highlight required API key field
-            pass
-

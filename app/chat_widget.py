@@ -1,9 +1,10 @@
 # app/chat_widget.py
-"""Chat widget for user interaction with the Jarvis agent."""
+"""Modern chat widget for JarvisAgent application."""
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QObject
-from PyQt6.QtGui import QTextCursor
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton, QHBoxLayout, QLabel
+from PyQt6.QtGui import QTextCursor, QFont, QPainter, QLinearGradient, QPalette, QColor
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton, QHBoxLayout, QLabel, QGraphicsOpacityEffect
+from PyQt6 import QtCore
 
 from models.model_router import get_client
 
@@ -22,7 +23,6 @@ class StreamingWorker(QObject):
     def run(self):
         try:
             full_response = ""
-            # Use async generator in a sync context
             import asyncio
             
             async def stream_async():
@@ -42,7 +42,7 @@ class StreamingWorker(QObject):
 
 
 class ChatWidget(QWidget):
-    """Main chat interface for user interaction."""
+    """Modern chat interface with elegant design."""
     
     def __init__(self):
         super().__init__()
@@ -54,53 +54,105 @@ class ChatWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(10)
-
-        # Header with model info
-        header = QLabel("💬 对话")
-        header.setStyleSheet("font-size: 16px; font-weight: bold; color: #e0e0ff; padding: 5px;")
-        layout.addWidget(header)
-
-        # Chat display
-        self.chat_display = QTextEdit()
-        self.chat_display.setReadOnly(True)
-        self.chat_display.setPlaceholderText("输入您的指令，Jarvis 将帮助您完成任务...")
-        self.chat_display.setStyleSheet("""
-            QTextEdit {
-                background: rgba(25, 25, 35, 0.8);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 15px;
-                color: #e0e0ff;
-                font-size: 14px;
-                line-height: 1.5;
+        self.setStyleSheet("""
+            QWidget {
+                background: transparent;
             }
         """)
-        layout.addWidget(self.chat_display)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 16, 24, 24)
+        layout.setSpacing(16)
 
-        # Welcome message
-        self.append_message("assistant", "👋 您好！我是 Jarvis，您的 AI 计算机助手。\n\n请描述您想要完成的任务，我将帮您执行。")
+        # Welcome header with animation effect
+        welcome_widget = QWidget()
+        welcome_widget.setFixedHeight(120)
+        welcome_layout = QVBoxLayout(welcome_widget)
+        welcome_layout.setContentsMargins(0, 20, 0, 0)
+        welcome_layout.setSpacing(8)
+        
+        welcome_icon = QLabel("✨")
+        welcome_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_icon.setStyleSheet("font-size: 36px;")
+        
+        welcome_title = QLabel("Jarvis AI 助手")
+        welcome_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_title.setStyleSheet("""
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        """)
+        
+        welcome_subtitle = QLabel("您的智能计算机控制助手")
+        welcome_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_subtitle.setStyleSheet("""
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        """)
+        
+        welcome_layout.addWidget(welcome_icon)
+        welcome_layout.addWidget(welcome_title)
+        welcome_layout.addWidget(welcome_subtitle)
+        layout.addWidget(welcome_widget)
 
-        # Input area
-        input_layout = QHBoxLayout()
-        input_layout.setSpacing(10)
+        # Chat display with modern styling
+        self.chat_display = QTextEdit()
+        self.chat_display.setReadOnly(True)
+        self.chat_display.setPlaceholderText("")
+        self.chat_display.setStyleSheet("""
+            QTextEdit {
+                background: rgba(30, 30, 46, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                padding: 20px;
+                color: #e8e8f0;
+                font-size: 15px;
+                line-height: 1.6;
+            }
+            QTextEdit QScrollBar:vertical {
+                background: transparent;
+                width: 6px;
+                border-radius: 3px;
+                margin: 4px 0;
+            }
+            QTextEdit QScrollBar::handle:vertical {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 3px;
+                min-height: 40px;
+            }
+            QTextEdit QScrollBar::handle:vertical:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+        """)
+        layout.addWidget(self.chat_display, 1)
+
+        # Input area with glass effect
+        input_container = QWidget()
+        input_container.setStyleSheet("""
+            QWidget {
+                background: rgba(40, 40, 60, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                padding: 4px;
+            }
+        """)
+        input_layout = QHBoxLayout(input_container)
+        input_layout.setContentsMargins(12, 8, 12, 8)
+        input_layout.setSpacing(12)
         
         self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("输入指令...")
+        self.input_field.setPlaceholderText("输入您的指令，Jarvis 将帮您完成...")
         self.input_field.setStyleSheet("""
             QLineEdit {
-                background: rgba(40, 44, 55, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                border-radius: 8px;
-                padding: 12px 16px;
-                color: #e0e0ff;
-                font-size: 14px;
+                background: transparent;
+                border: none;
+                padding: 8px 12px;
+                color: #ffffff;
+                font-size: 15px;
             }
             QLineEdit:focus {
-                border: 1px solid #5a9cff;
-                background: rgba(45, 50, 62, 0.7);
+                border: none;
             }
             QLineEdit:placeholder {
                 color: rgba(255, 255, 255, 0.4);
@@ -108,50 +160,57 @@ class ChatWidget(QWidget):
         """)
         
         self.send_btn = QPushButton("发送")
+        self.send_btn.setFixedSize(80, 40)
+        self.send_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.send_btn.setStyleSheet("""
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #4a86e8, stop:1 #3b6fc4);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #6366f1, stop:1 #8b5cf6);
                 color: white;
                 border: none;
-                border-radius: 8px;
-                padding: 12px 24px;
+                border-radius: 10px;
                 font-size: 14px;
-                font-weight: bold;
+                font-weight: 600;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #5a96f8, stop:1 #4a7fd4);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #7c7ff2, stop:1 #9b7cf7);
             }
             QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #3a76b4, stop:1 #2a5ea4);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #5558e8, stop:1 #7b5ce3);
             }
             QPushButton:disabled {
-                background: rgba(74, 134, 232, 0.4);
+                background: rgba(99, 102, 241, 0.4);
+                color: rgba(255, 255, 255, 0.5);
             }
         """)
         
         self.stop_btn = QPushButton("停止")
+        self.stop_btn.setFixedSize(80, 40)
         self.stop_btn.setEnabled(False)
+        self.stop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.stop_btn.setStyleSheet("""
             QPushButton {
-                background: rgba(255, 80, 80, 0.8);
+                background: rgba(239, 68, 68, 0.8);
                 color: white;
                 border: none;
-                border-radius: 8px;
-                padding: 12px 20px;
+                border-radius: 10px;
                 font-size: 14px;
+                font-weight: 600;
             }
             QPushButton:hover {
-                background: rgba(255, 90, 90, 0.9);
+                background: rgba(239, 68, 68, 0.9);
             }
         """)
-
-        input_layout.addWidget(self.input_field)
+        
+        input_layout.addWidget(self.input_field, 1)
         input_layout.addWidget(self.send_btn)
         input_layout.addWidget(self.stop_btn)
-        layout.addLayout(input_layout)
+        layout.addWidget(input_container)
+
+        # Welcome message
+        self.append_message("assistant", "👋 您好！我是 Jarvis。\n\n我可以帮助您完成各种计算机任务，只需告诉我您想要做什么。")
 
         # Connect signals
         self.send_btn.clicked.connect(self.send_message)
@@ -159,22 +218,32 @@ class ChatWidget(QWidget):
         self.stop_btn.clicked.connect(self.stop_streaming)
 
     def append_message(self, role: str, content: str):
-        """Append a message to the chat display."""
+        """Append a styled message to the chat display."""
         if role == "user":
             html = f'''
-            <div style="display: flex; justify-content: flex-end; margin: 8px 0;">
-                <div style="max-width: 75%; padding: 12px 16px; background: linear-gradient(135deg, #4a86e8, #3b6fc4); 
-                     border-radius: 16px 16px 4px 16px; color: white; line-height: 1.4;">
-                    <b>您:</b><br>{content.replace(chr(10), '<br>')}
+            <div style="margin: 16px 0; display: flex; justify-content: flex-end;">
+                <div style="max-width: 80%; padding: 14px 18px; 
+                     background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #6366f1, stop:1 #8b5cf6);
+                     border-radius: 18px 18px 6px 18px; 
+                     color: white; 
+                     font-size: 15px;
+                     line-height: 1.5;
+                     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                    {content.replace('\n', '<br>')}
                 </div>
             </div>
             '''
         else:
             html = f'''
-            <div style="display: flex; justify-content: flex-start; margin: 8px 0;">
-                <div style="max-width: 75%; padding: 12px 16px; background: rgba(40, 44, 55, 0.8); 
-                     border-radius: 16px 16px 16px 4px; color: #e0e0ff; line-height: 1.4;">
-                    <b>🤖 Jarvis:</b><br>{content.replace(chr(10), '<br>')}
+            <div style="margin: 16px 0; display: flex; justify-content: flex-start;">
+                <div style="max-width: 80%; padding: 14px 18px; 
+                     background: rgba(50, 50, 70, 0.6);
+                     border: 1px solid rgba(255, 255, 255, 0.08);
+                     border-radius: 18px 18px 18px 6px; 
+                     color: #e8e8f0; 
+                     font-size: 15px;
+                     line-height: 1.5;">
+                    {content.replace('\n', '<br>')}
                 </div>
             </div>
             '''
@@ -192,25 +261,25 @@ class ChatWidget(QWidget):
         self.input_field.clear()
         self.messages.append({"role": "user", "content": msg})
 
-        # Show thinking indicator
-        self.assistant_html = '''
-        <div style="display: flex; justify-content: flex-start; margin: 8px 0;">
-            <div style="max-width: 75%; padding: 12px 16px; background: rgba(40, 44, 55, 0.8); 
-                 border-radius: 16px 16px 16px 4px; color: #888; line-height: 1.4;">
-                <b>🤖 Jarvis:</b><br><span id="thinking">思考中...</span>
+        # Show typing indicator
+        self.chat_display.append('''
+            <div style="margin: 16px 0; display: flex; justify-content: flex-start;">
+                <div style="padding: 14px 18px; 
+                     background: rgba(50, 50, 70, 0.6);
+                     border: 1px solid rgba(255, 255, 255, 0.08);
+                     border-radius: 18px 18px 18px 6px;">
+                    <span style="color: #888; font-size: 14px;">思考中<span id="dots">...</span></span>
+                </div>
             </div>
-        </div>
-        '''
-        self.chat_display.append(self.assistant_html)
+        ''')
+        
         self.streaming = True
         self.current_response = ""
         self.update_ui_state()
 
-        # Start streaming
         try:
             client = get_client()
             
-            # Create worker for background processing
             self.thread = QThread()
             self.worker = StreamingWorker(client, self.messages.copy())
             self.worker.moveToThread(self.thread)
@@ -227,7 +296,7 @@ class ChatWidget(QWidget):
             
         except Exception as e:
             self.streaming = False
-            self.append_message("assistant", f"错误: {str(e)}")
+            self.append_message("assistant", f"❌ 连接错误: {str(e)}\n\n请检查您的 API 设置。")
             self.update_ui_state()
 
     def on_chunk(self, chunk: str):
@@ -239,14 +308,8 @@ class ChatWidget(QWidget):
         self.streaming = False
         self.messages.append({"role": "assistant", "content": full_response})
         
-        # Remove thinking indicator and show response
+        # Remove typing indicator
         cursor = self.chat_display.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.End)
-        cursor.select(QTextCursor.SelectionType.LineUnderCursor)
-        cursor.removeSelectedText()
-        cursor.deleteChar()
-        
-        # Remove last assistant message placeholder
         cursor.movePosition(QTextCursor.MoveOperation.End)
         cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
         cursor.removeSelectedText()
@@ -257,20 +320,19 @@ class ChatWidget(QWidget):
     def on_error(self, error: str):
         """Handle streaming error."""
         self.streaming = False
-        # Remove thinking indicator
+        
+        # Remove typing indicator
         cursor = self.chat_display.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
-        cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+        cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
         cursor.removeSelectedText()
-        cursor.deleteChar()
         
-        self.append_message("assistant", f"错误: {error}")
+        self.append_message("assistant", f"❌ 发生错误: {error}")
         self.update_ui_state()
 
     def stop_streaming(self):
         """Stop the current streaming."""
         if self.thread and self.thread.isRunning():
-            self.worker.error.emit("用户停止了请求")
             self.thread.quit()
             self.thread.wait()
 
@@ -284,4 +346,4 @@ class ChatWidget(QWidget):
         """Clear the chat history."""
         self.messages = []
         self.chat_display.clear()
-        self.append_message("assistant", "对话已清空。请描述您想要完成的任务。")
+        self.append_message("assistant", "✅ 对话已清空。请告诉我您想要完成什么任务？")
