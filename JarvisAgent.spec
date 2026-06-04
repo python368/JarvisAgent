@@ -4,6 +4,7 @@ PyInstaller spec for JarvisAgent macOS application.
 """
 
 import os
+import sys
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
@@ -12,8 +13,14 @@ APP_NAME = "JarvisAgent"
 APP_VERSION = "2.0.0"
 BUNDLE_IDENTIFIER = "com.jarvisagent.app"
 
-datas = []
+# Get the base path
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(os.path.abspath(SPEC))
 
+datas = []
 hiddenimports = [
     'PyQt6', 'PyQt6.QtCore', 'PyQt6.QtGui', 'PyQt6.QtWidgets', 'PyQt6.sip',
     'models.base_client', 'models.openai_client', 'models.anthropic_client',
@@ -22,40 +29,43 @@ hiddenimports = [
     'tools.file_manager', 'agent.agent', 'agent.planner', 'agent.task_manager',
     'agent.dialog_manager', 'agent.memory', 'config.app_config', 'utils.logger',
     'openai', 'anthropic', 'google.generativeai', 'google.genai', 'mss', 'PIL', 'pyautogui', 'requests',
-    'numpy', 'certifi', 'charset_normalizer', 'idna', 'urllib3', 'jiter',
+    'numpy', 'certifi', 'charset_normalizer', 'idna', 'urllib3',
 ]
-
-for mod in ['PyQt6', 'openai', 'anthropic', 'google', 'mss', 'numpy', 'PIL']:
-    try:
-        hiddenimports.extend(collect_submodules(mod))
-    except Exception:
-        pass
-
-for pkg in ['PyQt6', 'openai', 'anthropic', 'google']:
-    try:
-        datas.extend(collect_data_files(pkg))
-    except Exception:
-        pass
 
 a = Analysis(
     ['main.py'],
-    pathex=[os.path.dirname(os.path.abspath(__file__))],
-    binaries=[], datas=datas, hiddenimports=hiddenimports,
-    hookspath=[], runtime_hooks=[],
+    pathex=[os.path.dirname(os.path.abspath(SPEC))],
+    binaries=[],
+    datas=datas,
+    hiddenimports=hiddenimports,
+    hookspath=[],
+    runtime_hooks=[],
     excludes=['tkinter', 'matplotlib', 'IPython', 'notebook'],
-    cipher=block_cipher, noarchive=False,
+    cipher=block_cipher,
+    noarchive=False,
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
-    pyz, a.scripts, a.binaries, a.zipfiles, a.datas, [],
-    name='JarvisAgent', debug=False, strip=False, upx=True,
-    console=False, argv_emulation=True,
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='JarvisAgent',
+    debug=False,
+    strip=False,
+    upx=True,
+    console=False,
+    argv_emulation=True,
 )
 
 app = BUNDLE(
-    exe, name=f'{APP_NAME}.app', bundle_identifier=BUNDLE_IDENTIFIER,
+    exe,
+    name=f'{APP_NAME}.app',
+    bundle_identifier=BUNDLE_IDENTIFIER,
     info_plist={
         'CFBundleName': APP_NAME,
         'CFBundleDisplayName': 'Jarvis Agent',
