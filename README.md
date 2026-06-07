@@ -141,4 +141,4 @@ A: 确保已在系统设置中授予辅助功能权限
 
 ---
 
-MIT License - 2024 JarvisAgent
+2024 JarvisAgent
