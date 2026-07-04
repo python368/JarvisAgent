@@ -1,28 +1,3 @@
-#!/bin/bash
-echo "[1/4] 正在使用 Release 模式编译项目..."
-swift build -c release
-
-# 检查编译产物
-BINARY_PATH=".build/release/JarvisAgentSwift"
-if [ ! -f "$BINARY_PATH" ]; then
-    BINARY_PATH=".build/release/JarvisAgentSwift-product"
-fi
-
-if [ ! -f "$BINARY_PATH" ]; then
-    echo "Error: 找不到编译出的二进制文件！"
-    exit 1
-fi
-
-echo "[2/4] 正在构建标准 macOS .app 目录结构..."
-rm -rf JarvisAgentSwift.app
-mkdir -p JarvisAgentSwift.app/Contents/MacOS
-mkdir -p JarvisAgentSwift.app/Contents/Resources
-
-# 复制二进制文件
-cp "$BINARY_PATH" JarvisAgentSwift.app/Contents/MacOS/JarvisAgentSwift
-
-# 写入官方 Info.plist
-cat << 'INFO' > JarvisAgentSwift.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
