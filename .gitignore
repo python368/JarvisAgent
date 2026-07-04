@@ -1,0 +1,19 @@
+.DS_Store
+/.build
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+# macOS 垃圾文件
+.DS_Store
+
+# Swift Package Manager 编译产物
+/.build/
+/Packages
+.swiftpm/
+
+# Xcode 自动化生成
+DerivedData/
+
